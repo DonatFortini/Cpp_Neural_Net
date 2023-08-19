@@ -1,52 +1,75 @@
 #include "neuralNet.hpp"
 
-double neuralNet::sigmoid(double x)
+double NeuralNetwork::sigmoid(double x)
 {
     return 1 / (1 + exp(-x));
 }
 
-double neuralNet::sigmoid_derivative(double x)
+double NeuralNetwork::sigmoid_derivative(double x)
 {
     return x * (1 - x);
 }
 
-Matrix neuralNet::forward(Matrix inputs)
+Matrix NeuralNetwork::sigmoid(const Matrix &m)
 {
-    Matrix finalOutput(1, 1);
-    Matrix finalOutput(1, 1);
-    hidden_output = sigmoid(inputs.dot(weights_hidden_output) + bias_hidden);
-    finalOutput(0, 0) = sigmoid(hidden_output.dot(weights_hidden_output) + bias_output);
-    return finalOutput;
+    Matrix result = m;
+    for (size_t i = 0; i < m.getRows(); ++i)
+    {
+        for (size_t j = 0; j < m.getCols(); ++j)
+        {
+            result(i, j) = sigmoid(m(i, j));
+        }
+    }
+    return result;
 }
 
-void neuralNet::backward(Matrix inputs, Matrix targets, double learning_rate)
+Matrix NeuralNetwork::sigmoid_derivative(const Matrix &m)
 {
-    Matrix final_output = forward(inputs);
-    error = targets - final_output;
-    output_delta = error * sigmoid_derivative(final_output);
-    hidden_error = output_delta.dot(weights_hidden_output.T);
-    hidden_delta = hidden_error * sigmoid_derivative(hidden_output);
-    weights_hidden_output += hidden_output.T.dot(output_delta) * learning_rate;
-    bias_output += np.sum(output_delta, axis = 0, keepdims = True) * learning_rate;
-    weights_input_hidden += inputs.reshape(-1, 1).dot(hidden_delta.reshape(1, -1)) * learning_rate;
-    bias_hidden += np.sum(hidden_delta, axis = 0, keepdims = True) * learning_rate;
+    Matrix result = m;
+    for (size_t i = 0; i < m.getRows(); ++i)
+    {
+        for (size_t j = 0; j < m.getCols(); ++j)
+        {
+            result(i, j) = sigmoid_derivative(m(i, j));
+        }
+    }
+    return result;
 }
 
-void neuralNet::train(Matrix inputs, Matrix targets, double learning_rate, int epochs)
+Matrix NeuralNetwork::forward(const Matrix &inputs)
+{
+    Matrix hidden_output = sigmoid(dot(inputs, weights_input_hidden) + bias_hidden);
+    Matrix final_output = sigmoid(dot(hidden_output, weights_hidden_output) + bias_output);
+    return final_output;
+}
+
+void NeuralNetwork::backward(const Matrix &inputs, const Matrix &targets, double learning_rate)
+{
+
+    Matrix error = targets - forward(inputs);
+    Matrix output_delta = error * sigmoid_derivative(forward(inputs));
+    Matrix hidden_error = dot(output_delta, weights_hidden_output.transpose());
+    Matrix hidden_delta = hidden_error * sigmoid_derivative(dot(inputs, weights_input_hidden) + bias_hidden);
+    weights_hidden_output = weights_hidden_output + dot(forward(inputs).transpose(), output_delta) * learning_rate;
+    bias_output = bias_output + sum(output_delta) * learning_rate;
+    weights_input_hidden = weights_input_hidden + dot(inputs.transpose(), hidden_delta) * learning_rate;
+    bias_hidden = bias_hidden + sum(hidden_delta) * learning_rate;
+}
+
+void NeuralNetwork::train(Matrix inputs, Matrix targets, double learning_rate, int epochs)
 {
     for (int epoch = 0; epoch < epochs; ++epoch)
     {
-        for (size_t i = 0; i < inputs.getRows(); i++)
+        for (size_t i = 0; i < inputs.getCols(); ++i)
         {
-            Matrix input_data = inputs[i];
-            Matrix target_data = targets[i];
-
-            output = forward(input_data);
-
+            Matrix input_data(1, 1);
+            Matrix target_data(1, 1);
+            input_data(0, 0) = inputs[i];
+            target_data(0, 0) = targets[i];
+            Matrix output = forward(input_data);
             backward(input_data, target_data, learning_rate);
-
-            loss = np.mean(np.square(target_data - output));
-            std::cout << "Epoch " << epoch + 1 << "/" << epochs << ", Sample " << i + 1 << "/" << inputs.getRows() << ", Loss: " << loss << std::endl;
+            double loss = mean(square((target_data - output)));
+            std::cout << "Epoch " << epoch + 1 << "/" << epochs << ", Sample " << i + 1 << "/" << inputs.getCols() << ", Loss: " << loss << std::endl;
         }
     }
 }
@@ -69,7 +92,7 @@ int main(int argc, char const *argv[])
     targets(2, 0) = 1.0;
     targets(3, 0) = 0.0;
 
-    neuralNet net(2, 4, 1);
+    NeuralNetwork net(2, 4, 1);
     net.train(inputs, targets, 0.1, 10000);
 
     for (size_t i = 0; i < inputs.getRows(); i++)
@@ -77,8 +100,14 @@ int main(int argc, char const *argv[])
         Matrix input_data = inputs[i];
         Matrix target_data = targets[i];
         Matrix predicted_output = net.forward(input_data);
-        std::cout << "Input: " << input_data.print() << ", Target: " << target_data.print() << ", Predicted: " << predicted_output.print() << std::endl;
+        std::cout << "Input: ";
+        input_data.print();
+        std::cout << ", Target: ";
+        target_data.print();
+        std::cout << ", Predicted: ";
+        predicted_output.print();
+        std::cout << std::endl;
     }
-    
+
     return 0;
 }

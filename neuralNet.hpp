@@ -1,42 +1,32 @@
 #include "matrix.hpp"
 #include <math.h>
 
-#define e 2.71828182846
-
-class neuralNet
+class NeuralNetwork
 {
 private:
-    int inputSize;
-    int outputSize;
-    int hiddenSize;
-    Matrix bias_hidden;
-    Matrix bias_output;
     Matrix weights_input_hidden;
+    Matrix bias_hidden;
     Matrix weights_hidden_output;
+    Matrix bias_output;
 
 public:
-    neuralNet(int inputSize, int outputSize, int hiddenSize);
-    ~neuralNet();
+    NeuralNetwork(size_t input_size, size_t hidden_size, size_t output_size)
+        : weights_input_hidden(input_size, hidden_size), bias_hidden(1, hidden_size),
+          weights_hidden_output(hidden_size, output_size), bias_output(1, output_size)
+    {
+        weights_input_hidden.fill("rand");
+        bias_hidden.fill("zero");
+        weights_hidden_output.fill("rand");
+        bias_output.fill("zero");
+    }
+
     double sigmoid(double x);
     double sigmoid_derivative(double x);
-    Matrix forward(Matrix inputs);
-    void backward(Matrix inputs, Matrix targets, double learning_rate);
-    void train(Matrix inputs, Matrix targets, double learning_rate,int epochs);
+    Matrix sigmoid(const Matrix &m);
+    Matrix sigmoid_derivative(const Matrix &m);
+    Matrix forward(const Matrix &inputs);
+    void backward(const Matrix &inputs, const Matrix &targets, double learning_rate);
+    void train(Matrix inputs, Matrix targets, double learning_rate, int epochs);
 };
-
-neuralNet::neuralNet(int inputSize, int outputSize, int hiddenSize)
-{
-    this->inputSize = inputSize;
-    this->outputSize = outputSize;
-    this->hiddenSize = hiddenSize;
-    this->weights_input_hidden = randArray(this->inputSize, this->hiddenSize);
-    this->bias_hidden = zeros(1, this->hiddenSize);
-    this->weights_hidden_output = randArray(this->hiddenSize, this->outputSize);
-    this->bias_output = zeros(1, this->outputSize);
-}
-
-neuralNet::~neuralNet()
-{
-}
 
 
