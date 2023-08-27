@@ -25,8 +25,6 @@ public:
     Matrix sigmoid(const Matrix &m);
     Matrix sigmoid_derivative(const Matrix &m);
     Matrix forward(const Matrix &inputs);
-    void backward(const Matrix &inputs, const Matrix &targets, double learning_rate);
+    void backward(Matrix &inputs, Matrix &targets, double learning_rate);
     void train(Matrix inputs, Matrix targets, double learning_rate, int epochs);
 };
-
-

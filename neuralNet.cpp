@@ -43,13 +43,13 @@ Matrix NeuralNetwork::forward(const Matrix &inputs)
     return final_output;
 }
 
-void NeuralNetwork::backward(const Matrix &inputs, const Matrix &targets, double learning_rate)
+void NeuralNetwork::backward(Matrix &inputs, Matrix &targets, double learning_rate)
 {
 
     Matrix error = targets - forward(inputs);
     Matrix output_delta = error * sigmoid_derivative(forward(inputs));
     Matrix hidden_error = dot(output_delta, weights_hidden_output.transpose());
-    Matrix hidden_delta = hidden_error * sigmoid_derivative(dot(inputs, weights_input_hidden) + bias_hidden);
+    Matrix hidden_delta = sigmoid_derivative(sigmoid(dot(inputs, weights_input_hidden) + bias_hidden)) * hidden_error;
     weights_hidden_output = weights_hidden_output + dot(forward(inputs).transpose(), output_delta) * learning_rate;
     bias_output = bias_output + sum(output_delta) * learning_rate;
     weights_input_hidden = weights_input_hidden + dot(inputs.transpose(), hidden_delta) * learning_rate;
@@ -60,12 +60,10 @@ void NeuralNetwork::train(Matrix inputs, Matrix targets, double learning_rate, i
 {
     for (int epoch = 0; epoch < epochs; ++epoch)
     {
-        for (size_t i = 0; i < inputs.getCols(); ++i)
+        for (double i = 0; i < inputs.getCols(); ++i)
         {
-            Matrix input_data(1, 1);
-            Matrix target_data(1, 1);
-            input_data(0, 0) = inputs[i];
-            target_data(0, 0) = targets[i];
+            Matrix input_data = inputs[i];
+            Matrix target_data = targets[i];
             Matrix output = forward(input_data);
             backward(input_data, target_data, learning_rate);
             double loss = mean(square((target_data - output)));
@@ -95,7 +93,7 @@ int main(int argc, char const *argv[])
     NeuralNetwork net(2, 4, 1);
     net.train(inputs, targets, 0.1, 10000);
 
-    for (size_t i = 0; i < inputs.getRows(); i++)
+    for (double i = 0.0; i < inputs.getRows(); i++)
     {
         Matrix input_data = inputs[i];
         Matrix target_data = targets[i];

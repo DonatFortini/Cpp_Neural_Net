@@ -7,14 +7,14 @@ bool Matrix::isSquare()
 
 Matrix Matrix::operator-(Matrix other) const
 {
-    if (!((cols == rows) && other.isSquare() && other.cols == cols))
+    if (!(((cols == rows) && other.isSquare()) || (cols == other.cols && rows == other.rows)))
         throw std::invalid_argument("Matrix dimensions do not match.");
 
-    Matrix result(cols, rows);
+    Matrix result(rows,cols);
 
-    for (size_t i = 0; i < cols; i++)
+    for (int i = 0; i < rows; i++)
     {
-        for (size_t j = 0; j < cols; j++)
+        for (int j = 0; j < cols; j++)
         {
             result(i, j) = data[i][j] - other.data[i][j];
         }
@@ -25,14 +25,14 @@ Matrix Matrix::operator-(Matrix other) const
 
 Matrix Matrix::operator+(Matrix other) const
 {
-    if (!((cols == rows) && other.isSquare() && other.cols == cols))
+    if (!(((cols == rows) && other.isSquare()) || (cols == other.cols && rows == other.rows)))
         throw std::invalid_argument("Matrix dimensions do not match.");
 
-    Matrix result(cols, rows);
+    Matrix result(rows,cols);
 
-    for (size_t i = 0; i < cols; i++)
+    for (int i = 0; i < rows; i++)
     {
-        for (size_t j = 0; j < cols; j++)
+        for (int j = 0; j < cols; j++)
         {
             result(i, j) = data[i][j] + other.data[i][j];
         }
@@ -43,17 +43,17 @@ Matrix Matrix::operator+(Matrix other) const
 
 Matrix Matrix::operator*(Matrix other) const
 {
-    if (other.cols != rows)
+    if (other.rows != cols)
         throw std::invalid_argument("Matrix dimensions do not match for dot product.");
 
     Matrix result(rows, other.cols);
 
-    for (size_t i = 0; i < rows; ++i)
+    for (int i = 0; i < rows; ++i)
     {
-        for (size_t j = 0; j < other.cols; ++j)
+        for (int j = 0; j < other.cols; ++j)
         {
             double sum = 0.0;
-            for (size_t k = 0; k < cols; ++k)
+            for (int k = 0; k < cols; ++k)
             {
                 sum += data[i][k] * other(k, j);
             }
@@ -67,9 +67,9 @@ Matrix Matrix::operator*(Matrix other) const
 Matrix Matrix::operator*(double other) const
 {
     Matrix result(rows, cols);
-    for (size_t i = 0; i < rows; ++i)
+    for (int i = 0; i < rows; ++i)
     {
-        for (size_t j = 0; j < cols; ++j)
+        for (int j = 0; j < cols; ++j)
         {
             result(i, j) = data[i][j] * other;
         }
@@ -97,6 +97,23 @@ double Matrix::operator+(double other) const
     return data[0][0] + other;
 }
 
+Matrix Matrix::operator[](double index) const
+{
+    std::vector<double> slice = data[index];
+    Matrix x(1, (int)slice.capacity());
+    for (int i = 0; i < (int)slice.capacity(); i++)
+    {
+        x(0, i) = slice.at(i);
+    }
+
+    return x;
+}
+
+double Matrix::operator[](int index) const
+{
+    return data[0][index];
+}
+
 void Matrix::fill(std::string arg)
 {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
@@ -114,17 +131,17 @@ Matrix dot(const Matrix &origin, const Matrix &other)
     int rows = origin.getRows();
     int cols = other.getCols();
 
-    if (cols != rows)
+    if (origin.getCols() != other.getRows())
         throw std::invalid_argument("Matrix dimensions do not match for dot product.");
 
     Matrix result(rows, cols);
 
-    for (size_t i = 0; i < rows; ++i)
+    for (int i = 0; i < rows; ++i)
     {
-        for (size_t j = 0; j < cols; ++j)
+        for (int j = 0; j < cols; ++j)
         {
             double sum = 0.0;
-            for (size_t k = 0; k < origin.getCols(); ++k)
+            for (int k = 0; k < origin.getCols(); ++k)
             {
                 sum += origin(i, k) * other(k, j);
             }
@@ -165,14 +182,14 @@ double mean(Matrix A)
     return sum(A) / (A.getCols() * A.getRows());
 }
 
-Matrix zeros(size_t rows, size_t cols)
+Matrix zeros(int rows, int cols)
 {
     Matrix zero(rows, cols);
     zero.fill("zero");
     return zero;
 }
 
-Matrix randArray(size_t rows, size_t cols)
+Matrix randArray(int rows, int cols)
 {
     Matrix randArr(rows, cols);
     randArr.fill("rand");
@@ -206,6 +223,7 @@ Matrix Matrix::transpose()
     return result;
 }
 
+/*
 int main()
 {
     Matrix A(2, 3);
@@ -254,5 +272,9 @@ int main()
     double ezae = 2.0;
     z = z * ezae;
     z.print();
+
+    inputs[1.0].print();
+
     return 0;
 }
+*/

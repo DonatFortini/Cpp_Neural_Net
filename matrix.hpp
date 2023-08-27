@@ -8,11 +8,11 @@ class Matrix
 {
 private:
     std::vector<std::vector<double>> data;
-    size_t rows;
-    size_t cols;
+    int rows;
+    int cols;
 
 public:
-    Matrix(size_t rows, size_t cols) : rows(rows), cols(cols), data(rows, std::vector<double>(cols, 0.0)) {}
+    Matrix(int rows, int cols) : rows(rows), cols(cols), data(rows, std::vector<double>(cols, 0.0)) {}
 
     Matrix() : rows(rows), cols(cols), data(rows, std::vector<double>(cols, 0.0)) {}
 
@@ -21,24 +21,24 @@ public:
         return data;
     }
 
-    size_t getRows() const
+    int getRows() const
     {
         return rows;
     }
 
-    size_t getCols() const
+    int getCols() const
     {
         return cols;
     }
 
     bool isSquare();
 
-    double &operator()(size_t row, size_t col)
+    double &operator()(int row, int col)
     {
         return data[row][col];
     }
 
-    double operator()(size_t row, size_t col) const
+    double operator()(int row, int col) const
     {
         return data[row][col];
     }
@@ -50,6 +50,8 @@ public:
     Matrix operator=(double other) const;
     double operator-(double other) const;
     double operator+(double other) const;
+    Matrix operator[](double index) const;
+    double operator[](int index) const;
 
     void fill(std::string arg);
     void print();
@@ -61,5 +63,5 @@ double dot(const double &origin, const double &other);
 double sum(Matrix &A);
 Matrix square(Matrix A);
 double mean(Matrix A);
-Matrix zeros(size_t rows, size_t cols);
-Matrix randArray(size_t rows, size_t cols);
+Matrix zeros(int rows, int cols);
+Matrix randArray(int rows, int cols);
