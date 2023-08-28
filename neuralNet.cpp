@@ -13,9 +13,9 @@ double NeuralNetwork::sigmoid_derivative(double x)
 Matrix NeuralNetwork::sigmoid(const Matrix &m)
 {
     Matrix result = m;
-    for (size_t i = 0; i < m.getRows(); ++i)
+    for (int i = 0; i < m.getRows(); ++i)
     {
-        for (size_t j = 0; j < m.getCols(); ++j)
+        for (int j = 0; j < m.getCols(); ++j)
         {
             result(i, j) = sigmoid(m(i, j));
         }
@@ -26,9 +26,9 @@ Matrix NeuralNetwork::sigmoid(const Matrix &m)
 Matrix NeuralNetwork::sigmoid_derivative(const Matrix &m)
 {
     Matrix result = m;
-    for (size_t i = 0; i < m.getRows(); ++i)
+    for (int i = 0; i < m.getRows(); ++i)
     {
-        for (size_t j = 0; j < m.getCols(); ++j)
+        for (int j = 0; j < m.getCols(); ++j)
         {
             result(i, j) = sigmoid_derivative(m(i, j));
         }
@@ -49,11 +49,11 @@ void NeuralNetwork::backward(Matrix &inputs, Matrix &targets, double learning_ra
     Matrix error = targets - forward(inputs);
     Matrix output_delta = error * sigmoid_derivative(forward(inputs));
     Matrix hidden_error = dot(output_delta, weights_hidden_output.transpose());
-    Matrix hidden_delta = sigmoid_derivative(sigmoid(dot(inputs, weights_input_hidden) + bias_hidden)) * hidden_error;
-    weights_hidden_output = weights_hidden_output + dot(forward(inputs).transpose(), output_delta) * learning_rate;
+    Matrix hidden_delta = hidden_error.linear(sigmoid_derivative(sigmoid(dot(inputs, weights_input_hidden)) + bias_hidden));
+    weights_hidden_output = weights_hidden_output + dot(sigmoid(dot(inputs, weights_input_hidden) + bias_hidden).transpose(), output_delta) * learning_rate;
     bias_output = bias_output + sum(output_delta) * learning_rate;
-    weights_input_hidden = weights_input_hidden + dot(inputs.transpose(), hidden_delta) * learning_rate;
-    bias_hidden = bias_hidden + sum(hidden_delta) * learning_rate;
+    weights_input_hidden = weights_input_hidden + dot(inputs.reshape(-1,1),hidden_delta.reshape(1,-1))*learning_rate;
+    bias_hidden = bias_hidden + sum(hidden_delta) *  learning_rate;
 }
 
 void NeuralNetwork::train(Matrix inputs, Matrix targets, double learning_rate, int epochs)

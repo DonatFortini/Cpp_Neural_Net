@@ -10,7 +10,7 @@ Matrix Matrix::operator-(Matrix other) const
     if (!(((cols == rows) && other.isSquare()) || (cols == other.cols && rows == other.rows)))
         throw std::invalid_argument("Matrix dimensions do not match.");
 
-    Matrix result(rows,cols);
+    Matrix result(rows, cols);
 
     for (int i = 0; i < rows; i++)
     {
@@ -28,7 +28,7 @@ Matrix Matrix::operator+(Matrix other) const
     if (!(((cols == rows) && other.isSquare()) || (cols == other.cols && rows == other.rows)))
         throw std::invalid_argument("Matrix dimensions do not match.");
 
-    Matrix result(rows,cols);
+    Matrix result(rows, cols);
 
     for (int i = 0; i < rows; i++)
     {
@@ -223,6 +223,54 @@ Matrix Matrix::transpose()
     return result;
 }
 
+Matrix Matrix::linear(Matrix same) const
+{
+    Matrix result(cols, rows);
+    for (int i = 0; i < rows; ++i)
+    {
+        for (int j = 0; j < cols; ++j)
+        {
+            result(i, j) = data[i][j] * same(i, j);
+        }
+    }
+
+    return result;
+}
+
+Matrix Matrix::reshape(int Newrows, int Newcols) const
+{
+    if (Newcols == -1 && Newrows == -1)
+        throw std::invalid_argument("wrong dimensions.");
+
+    Newrows = (Newrows == -1) ? (cols * rows) / Newcols : Newrows;
+    Newcols = (Newcols == -1) ? (cols * rows) / Newrows : Newcols;
+
+    if (cols * rows != Newcols * Newrows)
+        throw std::invalid_argument("Matrix dimensions do not match for reshape.");
+
+    std::vector<double> line;
+
+    for (int i = 0; i < rows; ++i)
+    {
+        for (int j = 0; j < cols; ++j)
+        {
+            line.push_back(data[i][j]);
+        }
+    }
+
+    Matrix result(Newrows, Newcols);
+
+    for (int i = 0; i < Newrows; i++)
+    {
+        for (int j = 0; j < Newcols; j++)
+        {
+            result(i, j) = line.at(0);
+            line.erase(line.begin());
+        }
+    }
+
+    return result;
+}
 /*
 int main()
 {
@@ -275,6 +323,8 @@ int main()
 
     inputs[1.0].print();
 
+    B.reshape(1, 6).print();
+    B.reshape(1, -1).print();
     return 0;
 }
 */

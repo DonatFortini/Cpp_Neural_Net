@@ -56,6 +56,8 @@ public:
     void fill(std::string arg);
     void print();
     Matrix transpose();
+    Matrix linear(Matrix same) const;
+    Matrix reshape(int Newrows ,int Newcols)const;
 };
 
 Matrix dot(const Matrix &origin, const Matrix &other);
