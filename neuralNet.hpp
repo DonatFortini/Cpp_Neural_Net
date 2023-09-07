@@ -10,7 +10,7 @@ private:
     Matrix bias_output;
 
 public:
-    NeuralNetwork(size_t input_size, size_t hidden_size, size_t output_size)
+    NeuralNetwork(int input_size, int hidden_size, int output_size)
         : weights_input_hidden(input_size, hidden_size), bias_hidden(1, hidden_size),
           weights_hidden_output(hidden_size, output_size), bias_output(1, output_size)
     {

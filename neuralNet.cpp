@@ -49,11 +49,11 @@ void NeuralNetwork::backward(Matrix &inputs, Matrix &targets, double learning_ra
     Matrix error = targets - forward(inputs);
     Matrix output_delta = error * sigmoid_derivative(forward(inputs));
     Matrix hidden_error = dot(output_delta, weights_hidden_output.transpose());
-    Matrix hidden_delta = hidden_error.linear(sigmoid_derivative(sigmoid(dot(inputs, weights_input_hidden)) + bias_hidden));
+    Matrix hidden_delta = (hidden_error.linear(sigmoid_derivative(sigmoid(dot(inputs, weights_input_hidden)) + bias_hidden))).reshape(1, -1);
     weights_hidden_output = weights_hidden_output + dot(sigmoid(dot(inputs, weights_input_hidden) + bias_hidden).transpose(), output_delta) * learning_rate;
-    bias_output = bias_output + sum(output_delta) * learning_rate;
-    weights_input_hidden = weights_input_hidden + dot(inputs.reshape(-1,1),hidden_delta.reshape(1,-1))*learning_rate;
-    bias_hidden = bias_hidden + sum(hidden_delta) *  learning_rate;
+    bias_output = bias_output + sum(output_delta, 0, true) * learning_rate;
+    weights_input_hidden = weights_input_hidden + dot(inputs.reshape(-1, 1), hidden_delta) * learning_rate;
+    bias_hidden = bias_hidden + sum(hidden_delta, 0, true) * learning_rate;
 }
 
 void NeuralNetwork::train(Matrix inputs, Matrix targets, double learning_rate, int epochs)
@@ -93,7 +93,7 @@ int main(int argc, char const *argv[])
     NeuralNetwork net(2, 4, 1);
     net.train(inputs, targets, 0.1, 10000);
 
-    for (double i = 0.0; i < inputs.getRows(); i++)
+    for (double i = 0.0; i < inputs.getRows(); ++i)
     {
         Matrix input_data = inputs[i];
         Matrix target_data = targets[i];

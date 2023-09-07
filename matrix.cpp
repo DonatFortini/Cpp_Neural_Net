@@ -1,6 +1,6 @@
 #include "matrix.hpp"
 
-bool Matrix::isSquare()
+bool Matrix::isSquare(void)
 {
     return cols == rows;
 }
@@ -13,13 +13,8 @@ Matrix Matrix::operator-(Matrix other) const
     Matrix result(rows, cols);
 
     for (int i = 0; i < rows; i++)
-    {
         for (int j = 0; j < cols; j++)
-        {
             result(i, j) = data[i][j] - other.data[i][j];
-        }
-    }
-
     return result;
 }
 
@@ -31,13 +26,8 @@ Matrix Matrix::operator+(Matrix other) const
     Matrix result(rows, cols);
 
     for (int i = 0; i < rows; i++)
-    {
         for (int j = 0; j < cols; j++)
-        {
             result(i, j) = data[i][j] + other.data[i][j];
-        }
-    }
-
     return result;
 }
 
@@ -68,19 +58,9 @@ Matrix Matrix::operator*(double other) const
 {
     Matrix result(rows, cols);
     for (int i = 0; i < rows; ++i)
-    {
         for (int j = 0; j < cols; ++j)
-        {
             result(i, j) = data[i][j] * other;
-        }
-    }
-
     return result;
-}
-
-Matrix Matrix::operator=(double other) const
-{
-    return Matrix();
 }
 
 double Matrix::operator-(double other) const
@@ -102,10 +82,7 @@ Matrix Matrix::operator[](double index) const
     std::vector<double> slice = data[index];
     Matrix x(1, (int)slice.capacity());
     for (int i = 0; i < (int)slice.capacity(); i++)
-    {
         x(0, i) = slice.at(i);
-    }
-
     return x;
 }
 
@@ -118,12 +95,8 @@ void Matrix::fill(std::string arg)
 {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
     for (auto &iter : this->data)
-    {
         for (double &i : iter)
-        {
             i = (arg == "zero") ? 0.0 : static_cast<double>(std::rand()) / RAND_MAX;
-        }
-    }
 }
 
 Matrix dot(const Matrix &origin, const Matrix &other)
@@ -142,9 +115,7 @@ Matrix dot(const Matrix &origin, const Matrix &other)
         {
             double sum = 0.0;
             for (int k = 0; k < origin.getCols(); ++k)
-            {
                 sum += origin(i, k) * other(k, j);
-            }
             result(i, j) = sum;
         }
     }
@@ -172,6 +143,55 @@ double sum(Matrix &A)
     return sum;
 }
 
+Matrix sum(Matrix A, int axis, bool kd)
+{
+    if (kd)
+    {
+        if (axis != 0 && axis != 1)
+            throw std::invalid_argument("axis unavailable!!");
+        else
+        {
+            if (axis == 0)
+            {
+                Matrix x(1, A.getCols());
+                for (int i = 0; i < A.getCols(); i++)
+                {
+                    double s = 0;
+                    for (int j = 0; j < A.getRows(); j++)
+                    {
+                        s += A.getData()[j][i];
+                    }
+
+                    x(0, i) = s;
+                }
+
+                return x;
+            }
+            else
+            {
+                Matrix x(A.getRows(), 1);
+                for (int i = 0; i < A.getRows(); i++)
+                {
+                    double s = 0;
+                    for (int j = 0; j < A.getCols(); j++)
+                    {
+                        s += A.getData()[i][j];
+                    }
+
+                    x(i, 0) = s;
+                }
+                return x;
+            }
+        }
+    }
+    else
+    {
+        Matrix x(1, 1);
+        x(0, 0) = sum(A);
+        return x;
+    }
+}
+
 Matrix square(Matrix A)
 {
     return dot(A, A);
@@ -196,7 +216,7 @@ Matrix randArray(int rows, int cols)
     return randArr;
 }
 
-void Matrix::print()
+void Matrix::print(void)
 {
     for (const auto &iter : this->data)
     {
@@ -209,17 +229,12 @@ void Matrix::print()
     std::cout << std::endl;
 }
 
-Matrix Matrix::transpose()
+Matrix Matrix::transpose(void) const
 {
     Matrix result(cols, rows);
     for (int i = 0; i < rows; ++i)
-    {
         for (int j = 0; j < cols; ++j)
-        {
             result(j, i) = data[i][j];
-        }
-    }
-
     return result;
 }
 
@@ -227,13 +242,8 @@ Matrix Matrix::linear(Matrix same) const
 {
     Matrix result(cols, rows);
     for (int i = 0; i < rows; ++i)
-    {
         for (int j = 0; j < cols; ++j)
-        {
             result(i, j) = data[i][j] * same(i, j);
-        }
-    }
-
     return result;
 }
 
@@ -251,27 +261,29 @@ Matrix Matrix::reshape(int Newrows, int Newcols) const
     std::vector<double> line;
 
     for (int i = 0; i < rows; ++i)
-    {
         for (int j = 0; j < cols; ++j)
-        {
             line.push_back(data[i][j]);
-        }
-    }
 
     Matrix result(Newrows, Newcols);
+
+    auto lineIter = line.begin();
 
     for (int i = 0; i < Newrows; i++)
     {
         for (int j = 0; j < Newcols; j++)
         {
-            result(i, j) = line.at(0);
-            line.erase(line.begin());
+            if (lineIter != line.end())
+            {
+                result(i, j) = *lineIter;
+                ++lineIter;
+            }
         }
     }
 
     return result;
 }
-/*
+
+/* test
 int main()
 {
     Matrix A(2, 3);
@@ -325,6 +337,18 @@ int main()
 
     B.reshape(1, 6).print();
     B.reshape(1, -1).print();
+
+    Matrix s(3, 2);
+    s(0, 0) = 0.0;
+    s(0, 1) = 1.0;
+    s(1, 0) = 2.0;
+    s(1, 1) = 3.0;
+    s(2, 0) = 4.0;
+    s(2, 1) = 5.0;
+
+    s = sum(s, 1, false);
+    s.print();
+
     return 0;
 }
 */
