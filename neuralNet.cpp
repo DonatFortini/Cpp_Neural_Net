@@ -43,7 +43,6 @@ void NeuralNetwork::backward(Matrix &inputs, Matrix &targets, double learning_ra
 {
     Matrix output_delta = (targets - final_output) * sigmoid_derivative(final_output);
     Matrix hidden_error = dot(output_delta, weights_hidden_output.transpose());
-    // TODO fix cette putain de ligne memory leak linear???? check ca
     Matrix hidden_delta = (hidden_error.linear(sigmoid_derivative(hidden_output))).reshape(1, -1);
     weights_hidden_output = weights_hidden_output + dot(hidden_output.transpose(), output_delta) * learning_rate;
     bias_output = bias_output + sum(output_delta, 0, true) * learning_rate;
