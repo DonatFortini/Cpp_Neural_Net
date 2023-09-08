@@ -5,6 +5,16 @@ bool Matrix::isSquare(void)
     return cols == rows;
 }
 
+double &Matrix::operator()(int row, int col)
+{
+    return data[row][col];
+}
+
+double Matrix::operator()(int row, int col) const
+{
+    return data[row][col];
+}
+
 Matrix Matrix::operator-(Matrix other) const
 {
     if (!(((cols == rows) && other.isSquare()) || (cols == other.cols && rows == other.rows)))
@@ -39,18 +49,13 @@ Matrix Matrix::operator*(Matrix other) const
     Matrix result(rows, other.cols);
 
     for (int i = 0; i < rows; ++i)
-    {
         for (int j = 0; j < other.cols; ++j)
         {
             double sum = 0.0;
             for (int k = 0; k < cols; ++k)
-            {
                 sum += data[i][k] * other(k, j);
-            }
             result(i, j) = sum;
         }
-    }
-
     return result;
 }
 
@@ -110,7 +115,6 @@ Matrix dot(const Matrix &origin, const Matrix &other)
     Matrix result(rows, cols);
 
     for (int i = 0; i < rows; ++i)
-    {
         for (int j = 0; j < cols; ++j)
         {
             double sum = 0.0;
@@ -118,8 +122,6 @@ Matrix dot(const Matrix &origin, const Matrix &other)
                 sum += origin(i, k) * other(k, j);
             result(i, j) = sum;
         }
-    }
-
     return result;
 }
 
@@ -133,13 +135,11 @@ double sum(Matrix &A)
     double sum = 0.0;
     int count = 0;
     for (const auto &iter : A.getData())
-    {
         for (const double &i : iter)
         {
             sum += i;
             ++count;
         }
-    }
     return sum;
 }
 
@@ -258,27 +258,25 @@ Matrix Matrix::reshape(int Newrows, int Newcols) const
     if (cols * rows != Newcols * Newrows)
         throw std::invalid_argument("Matrix dimensions do not match for reshape.");
 
-    std::vector<double> line;
+    double line[Newcols * Newrows];
+    Matrix result(Newrows, Newcols);
+    int x = 0;
 
     for (int i = 0; i < rows; ++i)
         for (int j = 0; j < cols; ++j)
-            line.push_back(data[i][j]);
-
-    Matrix result(Newrows, Newcols);
-
-    auto lineIter = line.begin();
-
-    for (int i = 0; i < Newrows; i++)
-    {
-        for (int j = 0; j < Newcols; j++)
         {
-            if (lineIter != line.end())
-            {
-                result(i, j) = *lineIter;
-                ++lineIter;
-            }
+            line[x] = data[i][j];
+            ++x;
         }
-    }
+
+    x = 0;
+
+    for (int i = 0; i < Newrows; ++i)
+        for (int j = 0; j < Newcols; ++j)
+        {
+            result(i, j) = line[x];
+            ++x;
+        }
 
     return result;
 }

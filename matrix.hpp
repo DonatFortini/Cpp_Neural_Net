@@ -32,16 +32,8 @@ public:
 
     bool isSquare(void);
 
-    double &operator()(int row, int col)
-    {
-        return data[row][col];
-    }
-
-    double operator()(int row, int col) const
-    {
-        return data[row][col];
-    }
-
+    double &operator()(int row, int col);
+    double operator()(int row, int col) const;
     Matrix operator-(Matrix other) const;
     Matrix operator+(Matrix other) const;
     Matrix operator*(Matrix other) const;
